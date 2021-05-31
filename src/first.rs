@@ -46,6 +46,18 @@ pub struct List {
     head: Link,
 }
 
+#[derive(Debug)]
+enum Link {
+    Empty,
+    More(Box<Node>),
+}
+
+#[derive(Debug)]
+struct Node {
+    elem: i32,
+    next: Link,
+}
+
 impl List {
     pub fn new() -> Self {
         List { head: Link::Empty }
@@ -117,16 +129,49 @@ impl List {
     }
 }
 
-#[derive(Debug)]
-enum Link {
-    Empty,
-    More(Box<Node>),
-}
+// impl Drop for List {
+//     fn drop(&mut self) {
+//         // NOTE: you can't actually explicitly call `drop` in real Rust code;
+//         // we're pretending to be the compiler!
+//         self.head.drop(); // tail recursive - good!
+//     }
+// }
 
-#[derive(Debug)]
-struct Node {
-    elem: i32,
-    next: Link,
+// impl Drop for Link {
+//     fn drop(&mut self) {
+//         match *self {
+//             Link::Empty => {} // Done!
+//             Link::More(ref mut boxed_node) => {
+//                 boxed_node.drop(); // tail recursive - good!
+//             }
+//         }
+//     }
+// }
+
+// impl Drop for Box<Node> {
+//     fn drop(&mut self) {
+//         self.ptr.drop(); // uh oh, not tail recursive!
+//         deallocate(self.ptr);
+//     }
+// }
+
+// impl Drop for Node {
+//     fn drop(&mut self) {
+//         self.next.drop();
+//     }
+// }
+
+impl Drop for List {
+    fn drop(&mut self) {
+        let mut cur_link = mem::replace(&mut self.head, Link::Empty);
+        // `while let` == "do this thing until this pattern doesn't match"
+        while let Link::More(mut boxed_node) = cur_link {
+            cur_link = mem::replace(&mut boxed_node.next, Link::Empty);
+            // boxed_node goes out of scope and gets dropped here;
+            // but its Node's `next` field has been set to Link::Empty
+            // so no unbounded recursion occurs.
+        }
+    }
 }
 
 #[cfg(test)]
