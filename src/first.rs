@@ -76,6 +76,45 @@ impl List {
 
         self.head = Link::More(new_node);
     }
+
+    // pub fn pop(&mut self) -> Option<i32> {
+    //     match self.head {
+    //         Link::Empty => {}
+    //         Link::More(node) => {}
+    //     };
+    //     unimplemented!()
+    // }
+    // cannot move out of borrowed content, consider borrowing here: `&self.head`
+
+    // pub fn pop(&mut self) -> Option<i32> {
+    //     let result;
+    //     match &self.head {
+    //         Link::Empty => {
+    //             result = None;
+    //         }
+    //         Link::More(ref node) => {
+    //             result = Some(node.elem); // elem is copied here
+    //             self.head = node.next;
+    //         }
+    //     };
+    //     result
+    // }
+    // cannot move out of `node.next` which is behind a shared reference
+
+    pub fn pop(&mut self) -> Option<i32> {
+        match mem::replace(&mut self.head, Link::Empty) {
+            Link::Empty => None,
+            Link::More(node) => {
+                self.head = node.next;
+                Some(node.elem)
+            }
+        }
+        // The key insight is we want to remove things,
+        // which means we want to get the head of the list by value.
+        // We certainly can't do that through the shared reference we get through &self.head.
+        // We also "only" have a mutable reference to self, so the only way we can move stuff is to replace it.
+        // Looks like we're doing the Empty dance again!
+    }
 }
 
 #[derive(Debug)]
