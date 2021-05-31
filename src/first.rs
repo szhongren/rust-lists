@@ -150,7 +150,7 @@ impl List {
 
 // impl Drop for Box<Node> {
 //     fn drop(&mut self) {
-//         self.ptr.drop(); // uh oh, not tail recursive!
+//         self.ptr.drop(); // not tail recursive because we need to drop the Node before we deallocate the ptr, so we have to recur into the list
 //         deallocate(self.ptr);
 //     }
 // }
