@@ -3,6 +3,7 @@ use std::rc::Rc;
 pub struct List<T> {
     head: Link<T>,
 }
+
 type Link<T> = Option<Rc<Node<T>>>;
 
 struct Node<T> {
@@ -25,6 +26,7 @@ impl<T> List<T> {
     }
 
     pub fn tail(&self) -> List<T> {
+        // cdr
         List {
             // head: self.head.as_ref().map(|node| node.next.clone()),
             head: self.head.as_ref().and_then(|node| node.next.clone()),
@@ -56,6 +58,19 @@ impl<'a, T> Iterator for Iter<'a, T> {
             self.next = node.next.as_deref();
             &node.elem
         })
+    }
+}
+
+impl<T> Drop for List<T> {
+    fn drop(&mut self) {
+        let mut head = self.head.take();
+        while let Some(node) = head {
+            if let Ok(mut node) = Rc::try_unwrap(node) {
+                head = node.next.take();
+            } else {
+                break;
+            }
+        }
     }
 }
 
