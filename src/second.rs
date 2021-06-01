@@ -104,7 +104,11 @@ mod test {
         assert_eq!(list.peek(), Some(&3));
         assert_eq!(list.peek_mut(), Some(&mut 3));
         // list.peek_mut().map(|&mut value| value = 42);
-        // The compiler is complaining that value is immutable, but we pretty clearly wrote &mut value; what gives? It turns out that writing the argument of the closure that way doesn't specify that value is a mutable reference. Instead, it creates a pattern that will be matched against the argument to the closure; |&mut value| means "the argument is a mutable reference, but just copy the value it points to into value, please." If we just use |value|, the type of value will be &mut i32 and we can actually mutate the head:
+        // The compiler is complaining that value is immutable, but we pretty clearly wrote &mut value; what gives?
+        // It turns out that writing the argument of the closure that way doesn't specify that value is a mutable reference.
+        // Instead, it creates a pattern that will be matched against the argument to the closure;
+        // |&mut value| means "the argument is a mutable reference, but just copy the value it points to into value, please."
+        // If we just use |value|, the type of value will be &mut i32 and we can actually mutate the head:
         list.peek_mut().map(|value| *value = 42);
 
         assert_eq!(list.peek(), Some(&42));
