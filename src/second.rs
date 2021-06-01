@@ -150,6 +150,7 @@ impl<'a, T> Iterator for IterMut<'a, T> {
     type Item = &'a mut T;
 
     fn next(&mut self) -> Option<Self::Item> {
+        // need to take the Option<&> here, whereas before it was copied over in Iter above
         self.next.take().map(|node| {
             self.next = node.next.as_deref_mut();
             &mut node.elem
