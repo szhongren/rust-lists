@@ -93,7 +93,7 @@ impl<T> List<T> {
     // We declare a fresh lifetime here for the *exact* borrow that
     // creates the iter. Now &self needs to be valid as long as the
     // Iter is around.
-    pub fn iter<'a>(&'a self) -> Iter<'a, T> {
+    pub fn iter(&self) -> Iter<T> {
         Iter {
             // next: self.head.map(|node| &node),
             // next: self.head.map(|node| &*node),
